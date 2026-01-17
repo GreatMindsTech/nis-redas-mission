@@ -1,0 +1,48 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MissionController;
+use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\UserController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+
+    // Missions
+    Route::get('/missions', [MissionController::class, 'index']);
+    Route::get('/missions/{mission}', [MissionController::class, 'show']);
+    Route::post('/missions', [MissionController::class, 'store']);
+    Route::put('/missions/{mission}', [MissionController::class, 'update']);
+    Route::delete('/missions/{mission}', [MissionController::class, 'destroy']);
+    Route::post('/missions/{mission}/staff', [MissionController::class, 'addStaff']);
+    Route::delete('/missions/{mission}/staff', [MissionController::class, 'removeStaff']);
+
+    // Applications
+    Route::get('/applications', [ApplicationController::class, 'index']);
+    Route::get('/applications/{application}', [ApplicationController::class, 'show']);
+    Route::post('/applications', [ApplicationController::class, 'store']);
+    Route::put('/applications/{application}', [ApplicationController::class, 'update']);
+    Route::post('/applications/{application}/submit', [ApplicationController::class, 'submit']);
+    Route::post('/applications/{application}/review', [ApplicationController::class, 'review']);
+    Route::delete('/applications/{application}', [ApplicationController::class, 'destroy']);
+
+    // Users
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::put('/users/{user}/role', [UserController::class, 'updateRole']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
+});
