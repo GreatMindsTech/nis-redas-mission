@@ -13,18 +13,18 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-                Regional Diplomatic And Support Missions Management
+                Reporting Dashboard and Archiving System for Missions
               </h1>
               <p className="text-lg text-gray-100 mb-8">
-                Streamlined mission and visa application management for Nigeria Immigration Service
+                Streamlined Reporting process & Document Management for Immigration Attaches
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link
+                {/* <Link
                   href="/register"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white text-[#1b7b3c] font-semibold rounded-lg hover:bg-gray-100 transition"
                 >
                   Get Started <ArrowRight className="ml-2" size={20} />
-                </Link>
+                </Link> */}
                 <Link
                   href="/login"
                   className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#1b7b3c] transition"

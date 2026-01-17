@@ -9,8 +9,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "REDAS - Nigeria Immigration Service Missions Management",
-  description: "Regional Diplomatic And Support Missions Management System for Nigeria Immigration Service",
+  title: "REDAS | Diplomatic Missions",
+  description: "Reporting Dashboard & Archiving System for Immigration Missions",
   generator: "v0.app",
   icons: {
     icon: [

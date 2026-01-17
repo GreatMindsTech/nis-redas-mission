@@ -38,7 +38,7 @@ export default function Header() {
             <div className="w-8 h-8 bg-[#1b7b3c] rounded-full flex items-center justify-center text-white text-sm">
               NIS
             </div>
-            <span className="hidden sm:inline">REDAS</span>
+            <span className="hidden sm:inline">REDAS | MISSIONS</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
