@@ -16,7 +16,7 @@ export default function LandingPage() {
                 Reporting Dashboard and Archiving System for Missions
               </h1>
               <p className="text-lg text-gray-100 mb-8">
-                Streamlined Reporting process & Document Management for Immigration Attaches
+                Streamlined Reporting & Document Management for Immigration Attaches
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* <Link
@@ -59,7 +59,7 @@ export default function LandingPage() {
               {
                 icon: Users,
                 title: "Multi-Role Access",
-                description: "Tailored access for users, supervisors, and admins",
+                description: "Tailored access for users, supervisors and admins",
               },
               {
                 icon: Shield,
@@ -68,8 +68,8 @@ export default function LandingPage() {
               },
               {
                 icon: CheckCircle,
-                title: "Streamlined Process",
-                description: "Efficient visa and mission management workflows",
+                title: "Archiving",
+                description: "Efficient visa and passport document management workflows",
               },
             ].map((feature, index) => (
               <div key={index} className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg transition">
@@ -93,7 +93,7 @@ export default function LandingPage() {
             {[
               {
                 role: "User",
-                description: "Submit visa applications and track mission requests",
+                description: "Submit Reports, archive documents and track mission requests",
               },
               {
                 role: "Supervisor",
@@ -101,11 +101,11 @@ export default function LandingPage() {
               },
               {
                 role: "Admin",
-                description: "Manage missions, users, and system operations",
+                description: "Manage mission submissions and approvals",
               },
               {
                 role: "Super Admin",
-                description: "System-wide administration and compliance oversight",
+                description: "Mission-wide administration and Oversight",
               },
             ].map((item, index) => (
               <div key={index} className="bg-gradient-to-br from-[#1b7b3c] from-10% to-gray-50 p-8 rounded-xl">

@@ -10,7 +10,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-bold mb-4">REDAS | MISSIONS</h3>
             <p className="text-sm text-gray-400">
-              Streamlined Reporting process & Document Management for Immigration Attaches
+              Streamlined Reporting & Document Management for Immigration Attaches
             </p>
           </div>
 
@@ -35,12 +35,12 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="text-gray-400 hover:text-[#1b7b3c] transition">
-                  Visa Management
+                  Document Management
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-400 hover:text-[#1b7b3c] transition">
-                  Mission Support
+                  Reporting
                 </a>
               </li>
             </ul>

@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,4 +46,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::put('/users/{user}/role', [UserController::class, 'updateRole']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+    // Documents
+    Route::get('/documents', [DocumentController::class, 'index']);
+    Route::get('/documents/statistics', [DocumentController::class, 'statistics']);
+    Route::get('/documents/{document}', [DocumentController::class, 'show']);
+    Route::post('/documents', [DocumentController::class, 'store']);
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
+    Route::post('/documents/{document}/approve', [DocumentController::class, 'approve']);
+    Route::post('/documents/{document}/reject', [DocumentController::class, 'reject']);
+    Route::delete('/documents/{document}', [DocumentController::class, 'destroy']);
 });

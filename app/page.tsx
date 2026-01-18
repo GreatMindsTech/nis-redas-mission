@@ -15,15 +15,15 @@ export default function Home() {
             <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">REDAS - DIPLOMATIC MISSIONS</h1>
             <p className="text-xl text-gray-600 mb-8">Reporting Dashboard & Archiving System for NIS Missions </p>
             <p className="text-gray-500 mb-8 max-w-2xl mx-auto">
-              Streamlined Reporting process & Document Management for Immigration Attaches
+              Streamlined Reporting & Document Management for Immigration Attaches
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
+              {/* <a
                 href="/register"
                 className="px-8 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition"
               >
                 Get Started
-              </a>
+              </a> */}
               <a
                 href="/about"
                 className="px-8 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary/10 transition"
@@ -41,12 +41,12 @@ export default function Home() {
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
               <div className="text-3xl mb-4">📋</div>
               <h3 className="text-xl font-semibold mb-2">Report Management</h3>
-              <p className="text-gray-600">Easy submission and collation of Returns</p>
+              <p className="text-gray-600">Easy submission and collation of Returns & Reports</p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
               <div className="text-3xl mb-4">🌍</div>
               <h3 className="text-xl font-semibold mb-2">Workflow Management</h3>
-              <p className="text-gray-600">One-stop for all Requests and Submissions to the SHQ</p>
+              <p className="text-gray-600">One-stop shop for all Requests and Submissions to the SHQ</p>
             </div>
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
               <div className="text-3xl mb-4">👥</div>

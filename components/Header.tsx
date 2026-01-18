@@ -56,6 +56,16 @@ export default function Header() {
                 <Link href="/missions" className="text-gray-700 hover:text-[#1b7b3c] transition">
                   Missions
                 </Link>
+                {user.role === "user" && (
+                  <Link href="/archiving" className="text-gray-700 hover:text-[#1b7b3c] transition">
+                    Archiving
+                  </Link>
+                )}
+                {(user.role === "admin" || user.role === "super_admin") && (
+                  <Link href="/documents-review" className="text-gray-700 hover:text-[#1b7b3c] transition">
+                    Documents Review
+                  </Link>
+                )}
                 <Link href={getDashboardLink()} className="text-gray-700 hover:text-[#1b7b3c] transition">
                   Dashboard
                 </Link>
@@ -134,6 +144,24 @@ export default function Header() {
                 >
                   Missions
                 </Link>
+                {user.role === "user" && (
+                  <Link
+                    href="/archiving"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Archiving
+                  </Link>
+                )}
+                {(user.role === "admin" || user.role === "super_admin") && (
+                  <Link
+                    href="/documents-review"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Documents Review
+                  </Link>
+                )}
                 <Link
                   href={getDashboardLink()}
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
