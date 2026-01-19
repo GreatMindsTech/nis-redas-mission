@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { useAuth } from "@/components/contexts/AuthContext"
+import { getApiUrl } from "@/lib/api-config"
 import {
   FileText,
   Plus,
@@ -18,8 +19,11 @@ import {
   Trash2,
   Eye,
   AlertCircle,
+  Printer,
+  Download,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 
 interface Report {
   id: number
@@ -82,6 +86,10 @@ export default function ReportingPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [filterInterval, setFilterInterval] = useState<string>("all")
   const [filterType, setFilterType] = useState<string>("all")
+  
+  // Pagination for admin view
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(10)
 
   // Form state
   const [showForm, setShowForm] = useState(false)
@@ -114,7 +122,7 @@ export default function ReportingPage() {
   const fetchStatistics = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reports/statistics`, {
+      const response = await fetch(getApiUrl("/reports/statistics"), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -132,7 +140,7 @@ export default function ReportingPage() {
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem("token")
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/api/reports`
+      let url = getApiUrl("/reports")
 
       const params = new URLSearchParams()
       if (filterStatus !== "all") params.append("status", filterStatus)
@@ -166,8 +174,8 @@ export default function ReportingPage() {
     try {
       const token = localStorage.getItem("token")
       const url = editingReport
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/reports/${editingReport.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/reports`
+        ? getApiUrl(`/reports/${editingReport.id}`)
+        : getApiUrl("/reports")
 
       const response = await fetch(url, {
         method: editingReport ? "PUT" : "POST",
@@ -205,7 +213,7 @@ export default function ReportingPage() {
 
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reports/${reportId}`, {
+      const response = await fetch(getApiUrl(`/reports/${reportId}`), {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -238,7 +246,7 @@ export default function ReportingPage() {
     try {
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/reports/${reviewingReport.id}/${reviewAction}`,
+        getApiUrl(`/reports/${reviewingReport.id}/${reviewAction}`),
         {
           method: "POST",
           headers: {
@@ -304,6 +312,41 @@ export default function ReportingPage() {
     setReviewComments("")
   }
 
+  const handlePrintReport = () => {
+    window.print()
+  }
+
+  const handleGenerateReport = () => {
+    // Generate CSV export
+    const headers = ["ID", "Type", "Interval", "Date", "Passport Count", "Visa Count", "Status", "Submitted By", "Remarks"]
+    const csvData = reports.map(report => [
+      report.id,
+      report.report_type_label,
+      report.interval_label,
+      new Date(report.report_date).toLocaleDateString(),
+      report.passport_count || "N/A",
+      report.visa_count || "N/A",
+      report.status_label,
+      `${report.user.first_name} ${report.user.last_name}`,
+      report.remarks || "N/A"
+    ])
+
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `reports_${new Date().toISOString().split("T")[0]}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -337,26 +380,377 @@ export default function ReportingPage() {
     }
   }
 
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentReports = reports.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(reports.length / itemsPerPage)
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+  }
+
   if (!user) {
     return null
   }
 
   const isUser = user.role === "user"
-  const isSupervisor = ["supervisor", "admin", "super_admin"].includes(user.role)
+  const isSupervisor = user.role === "supervisor"
   const isAdmin = ["admin", "super_admin"].includes(user.role)
+
+  // Render Admin Datatable View
+  const renderAdminView = () => (
+    <>
+      {/* Admin Actions Bar */}
+      <div className="bg-white rounded-lg shadow-md p-4 mb-6 flex items-center justify-between print:hidden">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleGenerateReport}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1b7b3c] text-white rounded-lg hover:bg-[#155730] transition"
+          >
+            <Download size={20} />
+            Generate Report
+          </button>
+          <button
+            onClick={handlePrintReport}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+          >
+            <Printer size={20} />
+            Print Report
+          </button>
+        </div>
+        <div className="text-sm text-gray-600">
+          Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, reports.length)} of {reports.length} reports
+        </div>
+      </div>
+
+      {/* Admin Datatable */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1b7b3c]"></div>
+          <p className="text-gray-600 mt-4">Loading reports...</p>
+        </div>
+      ) : reports.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <FileText className="mx-auto text-gray-400 mb-4" size={64} />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No reports found</h3>
+          <p className="text-gray-600">No reports match your current filters</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[80px]">ID</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Interval</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-center">Passport</TableHead>
+                  <TableHead className="text-center">Visa</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Submitted By</TableHead>
+                  <TableHead className="text-right print:hidden">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentReports.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell className="font-medium">#{report.id}</TableCell>
+                    <TableCell>{report.report_type_label}</TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                        {report.interval_label}
+                      </span>
+                    </TableCell>
+                    <TableCell>{new Date(report.report_date).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-center">
+                      {report.passport_count !== null ? report.passport_count : "-"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {report.visa_count !== null ? report.visa_count : "-"}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(report.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User size={16} className="text-gray-400" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {report.user.first_name} {report.user.last_name}
+                          </p>
+                          <p className="text-xs text-gray-500">{report.user.email}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right print:hidden">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setViewingReport(report)}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                          title="View Details"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        {report.status === "vetted" && (
+                          <>
+                            <button
+                              onClick={() => openReviewModal(report, "approve")}
+                              className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-xs font-medium"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => openReviewModal(report, "reject")}
+                              className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-xs font-medium"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between print:hidden">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Page <span className="font-medium">{currentPage}</span> of{" "}
+                    <span className="font-medium">{totalPages}</span>
+                  </p>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          currentPage === page
+                            ? "z-10 bg-[#1b7b3c] border-[#1b7b3c] text-white"
+                            : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )
+
+  // Render Default Card View (Users & Supervisors)
+  const renderDefaultView = () => (
+    <>
+      {/* Reports List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1b7b3c]"></div>
+          <p className="text-gray-600 mt-4">Loading reports...</p>
+        </div>
+      ) : reports.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <FileText className="mx-auto text-gray-400 mb-4" size={64} />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No reports found</h3>
+          <p className="text-gray-600">
+            {isUser ? "Start by creating your first report" : "No reports match your current filters"}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {reports.map((report) => (
+            <div key={report.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">{report.report_type_label}</h3>
+                    {getStatusBadge(report.status)}
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                      {report.interval_label}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Report Date</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {new Date(report.report_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    {report.passport_count !== null && (
+                      <div>
+                        <p className="text-xs text-gray-500">Passport Returns</p>
+                        <p className="text-sm font-medium text-gray-900">{report.passport_count}</p>
+                      </div>
+                    )}
+                    {report.visa_count !== null && (
+                      <div>
+                        <p className="text-xs text-gray-500">Visa Returns</p>
+                        <p className="text-sm font-medium text-gray-900">{report.visa_count}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs text-gray-500">Submitted</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {new Date(report.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {report.remarks && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">Remarks</p>
+                      <p className="text-sm text-gray-700">{report.remarks}</p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <User size={16} />
+                    <span>
+                      {report.user.first_name} {report.user.last_name}
+                    </span>
+                    <span className="text-gray-400">({report.user.email})</span>
+                  </div>
+
+                  {/* Review Comments */}
+                  {report.vet_comments && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-900">
+                        <strong>Vet Comments:</strong> {report.vet_comments}
+                      </p>
+                      {report.vetter && report.vetted_at && (
+                        <p className="text-xs text-blue-700 mt-1">
+                          Vetted by {report.vetter.first_name} {report.vetter.last_name} on{" "}
+                          {new Date(report.vetted_at).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {report.approval_comments && (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-900">
+                        <strong>Approval Comments:</strong> {report.approval_comments}
+                      </p>
+                      {report.approver && report.approved_at && (
+                        <p className="text-xs text-green-700 mt-1">
+                          Approved by {report.approver.first_name} {report.approver.last_name} on{" "}
+                          {new Date(report.approved_at).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 ml-4">
+                  <button
+                    onClick={() => setViewingReport(report)}
+                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                    title="View Details"
+                  >
+                    <Eye size={20} />
+                  </button>
+
+                  {/* User actions */}
+                  {isUser && report.status === "pending" && report.user.id === parseInt(user.id) && (
+                    <>
+                      <button
+                        onClick={() => openEditForm(report)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title="Edit"
+                      >
+                        <Edit size={20} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                        title="Delete"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </>
+                  )}
+
+                  {/* Supervisor actions */}
+                  {isSupervisor && report.status === "pending" && (
+                    <>
+                      <button
+                        onClick={() => openReviewModal(report, "vet")}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                      >
+                        Vet
+                      </button>
+                      <button
+                        onClick={() => openReviewModal(report, "reject")}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between print:mb-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Reporting</h1>
             <p className="text-gray-600 mt-1">
               {isUser && "Submit passport and visa return reports"}
-              {isSupervisor && !isAdmin && "Review and vet submitted reports"}
-              {isAdmin && "Approve vetted reports"}
+              {isSupervisor && "Review and vet submitted reports"}
+              {isAdmin && "Approve vetted reports and manage reporting"}
             </p>
           </div>
           {isUser && (
@@ -365,7 +759,7 @@ export default function ReportingPage() {
                 resetForm()
                 setShowForm(true)
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#1b7b3c] text-white rounded-lg hover:bg-[#155730] transition"
+              className="flex items-center gap-2 px-4 py-2 bg-[#1b7b3c] text-white rounded-lg hover:bg-[#155730] transition print:hidden"
             >
               <Plus size={20} />
               New Report
@@ -429,7 +823,7 @@ export default function ReportingPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-6 print:hidden">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -498,177 +892,8 @@ export default function ReportingPage() {
           </div>
         </div>
 
-        {/* Reports List */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1b7b3c]"></div>
-            <p className="text-gray-600 mt-4">Loading reports...</p>
-          </div>
-        ) : reports.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <FileText className="mx-auto text-gray-400 mb-4" size={64} />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No reports found</h3>
-            <p className="text-gray-600">
-              {isUser ? "Start by creating your first report" : "No reports match your current filters"}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {reports.map((report) => (
-              <div key={report.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{report.report_type_label}</h3>
-                      {getStatusBadge(report.status)}
-                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
-                        {report.interval_label}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                      <div>
-                        <p className="text-xs text-gray-500">Report Date</p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {new Date(report.report_date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      {report.passport_count !== null && (
-                        <div>
-                          <p className="text-xs text-gray-500">Passport Returns</p>
-                          <p className="text-sm font-medium text-gray-900">{report.passport_count}</p>
-                        </div>
-                      )}
-                      {report.visa_count !== null && (
-                        <div>
-                          <p className="text-xs text-gray-500">Visa Returns</p>
-                          <p className="text-sm font-medium text-gray-900">{report.visa_count}</p>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-xs text-gray-500">Submitted</p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {new Date(report.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-
-                    {report.remarks && (
-                      <div className="mb-3">
-                        <p className="text-xs text-gray-500 mb-1">Remarks</p>
-                        <p className="text-sm text-gray-700">{report.remarks}</p>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <User size={16} />
-                      <span>
-                        {report.user.first_name} {report.user.last_name}
-                      </span>
-                      <span className="text-gray-400">({report.user.email})</span>
-                    </div>
-
-                    {/* Review Comments */}
-                    {report.vet_comments && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-900">
-                          <strong>Vet Comments:</strong> {report.vet_comments}
-                        </p>
-                        {report.vetter && report.vetted_at && (
-                          <p className="text-xs text-blue-700 mt-1">
-                            Vetted by {report.vetter.first_name} {report.vetter.last_name} on{" "}
-                            {new Date(report.vetted_at).toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {report.approval_comments && (
-                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-sm text-green-900">
-                          <strong>Approval Comments:</strong> {report.approval_comments}
-                        </p>
-                        {report.approver && report.approved_at && (
-                          <p className="text-xs text-green-700 mt-1">
-                            Approved by {report.approver.first_name} {report.approver.last_name} on{" "}
-                            {new Date(report.approved_at).toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => setViewingReport(report)}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                      title="View Details"
-                    >
-                      <Eye size={20} />
-                    </button>
-
-                    {/* User actions */}
-                    {isUser && report.status === "pending" && report.user.id === parseInt(user.id) && (
-                      <>
-                        <button
-                          onClick={() => openEditForm(report)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Edit"
-                        >
-                          <Edit size={20} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteReport(report.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Delete"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </>
-                    )}
-
-                    {/* Supervisor actions */}
-                    {isSupervisor && report.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => openReviewModal(report, "vet")}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-                        >
-                          Vet
-                        </button>
-                        <button
-                          onClick={() => openReviewModal(report, "reject")}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-
-                    {/* Admin actions */}
-                    {isAdmin && report.status === "vetted" && (
-                      <>
-                        <button
-                          onClick={() => openReviewModal(report, "approve")}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => openReviewModal(report, "reject")}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Conditional Rendering Based on Role */}
+        {isAdmin ? renderAdminView() : renderDefaultView()}
       </div>
 
       {/* Submit/Edit Form Modal */}

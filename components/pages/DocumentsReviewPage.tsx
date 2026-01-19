@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { useAuth } from "@/components/contexts/AuthContext"
+import { getApiUrl } from "@/lib/api-config"
 import { FileText, Download, CheckCircle, XCircle, Clock, Search, Filter, User, Calendar } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -71,7 +72,7 @@ export default function DocumentsReviewPage() {
   const fetchStatistics = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/documents/statistics`, {
+      const response = await fetch(getApiUrl("/documents/statistics"), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +91,7 @@ export default function DocumentsReviewPage() {
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem("token")
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/api/documents`
+      let url = getApiUrl("/documents")
 
       const params = new URLSearchParams()
       if (filterStatus !== "all") params.append("status", filterStatus)
@@ -126,7 +127,7 @@ export default function DocumentsReviewPage() {
     try {
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/documents/${documentId}/download`,
+        getApiUrl(`/documents/${documentId}/download`),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -178,7 +179,7 @@ export default function DocumentsReviewPage() {
     try {
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/documents/${reviewingDoc.id}/${reviewAction}`,
+        getApiUrl(`/documents/${reviewingDoc.id}/${reviewAction}`),
         {
           method: "POST",
           headers: {

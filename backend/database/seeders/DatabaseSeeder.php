@@ -45,5 +45,8 @@ class DatabaseSeeder extends Seeder
 
         // Create additional random users for testing (optional)
         User::factory(5)->create();
+
+        // Seed missions
+        $this->call(MissionSeeder::class);
     }
 }

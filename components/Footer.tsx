@@ -26,6 +26,11 @@ export default function Footer() {
                 <Link href="/missions" className="text-gray-400 hover:text-[#1b7b3c] transition">
                   Missions
                 </Link>
+                </li>
+                <li>
+                <Link href="/services" className="text-gray-400 hover:text-[#1b7b3c] transition">
+                  Services
+                </Link>
               </li>
             </ul>
           </div>

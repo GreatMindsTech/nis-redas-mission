@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { useAuth } from "@/components/contexts/AuthContext"
+import { getApiUrl } from "@/lib/api-config"
 import { Upload, FileText, Download, Trash2, Search, Filter, X, CheckCircle, XCircle, Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -65,7 +66,7 @@ export default function ArchivingPage() {
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem("token")
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/api/documents`
+      let url = getApiUrl("/documents")
       
       const params = new URLSearchParams()
       if (filterStatus !== "all") params.append("status", filterStatus)
@@ -319,7 +320,7 @@ export default function ArchivingPage() {
         formData.append("description", uploadData.description)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/documents`, {
+      const response = await fetch(getApiUrl("/documents"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -363,7 +364,7 @@ export default function ArchivingPage() {
     try {
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/documents/${documentId}/download`,
+        getApiUrl(`/documents/${documentId}/download`),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -395,7 +396,7 @@ export default function ArchivingPage() {
 
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/documents/${documentId}`, {
+      const response = await fetch(getApiUrl(`/documents/${documentId}`), {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

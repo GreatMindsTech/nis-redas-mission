@@ -8,6 +8,9 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\EventController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,4 +71,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reports/{report}/approve', [ReportController::class, 'approve']);
     Route::post('/reports/{report}/reject', [ReportController::class, 'reject']);
     Route::delete('/reports/{report}', [ReportController::class, 'destroy']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
+    Route::post('/notifications/broadcast', [NotificationController::class, 'broadcast']);
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+    Route::delete('/notifications/read/all', [NotificationController::class, 'deleteAllRead']);
+
+    // Messages & Conversations
+    Route::get('/conversations', [MessageController::class, 'getConversations']);
+    Route::get('/conversations/{userId}', [MessageController::class, 'getOrCreateConversation']);
+    Route::get('/conversations/{conversation}/messages', [MessageController::class, 'getMessages']);
+    Route::post('/conversations/{conversation}/messages', [MessageController::class, 'sendMessage']);
+    Route::put('/messages/{message}', [MessageController::class, 'updateMessage']);
+    Route::delete('/messages/{message}', [MessageController::class, 'deleteMessage']);
+    Route::post('/conversations/{conversation}/mark-read', [MessageController::class, 'markAsRead']);
+    Route::get('/messages/unread-count', [MessageController::class, 'getUnreadCount']);
+    Route::get('/users/search', [MessageController::class, 'searchUsers']);
+
+    // Events & Calendar
+    Route::get('/events', [EventController::class, 'index']);
+    Route::get('/events/upcoming', [EventController::class, 'upcoming']);
+    Route::get('/events/statistics', [EventController::class, 'statistics']);
+    Route::get('/events/{event}', [EventController::class, 'show']);
+    Route::post('/events', [EventController::class, 'store']);
+    Route::put('/events/{event}', [EventController::class, 'update']);
+    Route::delete('/events/{event}', [EventController::class, 'destroy']);
 });

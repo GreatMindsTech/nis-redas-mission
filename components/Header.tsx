@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAuth } from "./contexts/AuthContext"
 import { Menu, X, LogOut, User } from "lucide-react"
 import { useState } from "react"
+import logo from "@/public/nis.svg"
 
 export default function Header() {
   const { user, logout } = useAuth()
@@ -34,15 +36,14 @@ export default function Header() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* NIS Logo and AppTitle */}
           <Link href="/" className="flex items-center gap-2 font-bold text-xl text-[#1b7b3c]">
-            <div className="w-8 h-8 bg-[#1b7b3c] rounded-full flex items-center justify-center text-white text-sm">
-              NIS
-            </div>
-            <span className="hidden sm:inline">REDAS | MISSIONS</span>
+            <Image src={logo} alt="NIS Logo" width={32} height={32} className="object-contain" />
+            <span className="hidden sm:inline">REDAS | DIPLOMATIC MISSIONS</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-gray-700 hover:text-[#1b7b3c] transition">
+            {/* <Link href="/" className="text-gray-700 hover:text-[#1b7b3c] transition">
               Home
             </Link>
             <Link href="/about" className="text-gray-700 hover:text-[#1b7b3c] transition">
@@ -75,7 +76,7 @@ export default function Header() {
                   Dashboard
                 </Link>
               </>
-            )}
+            )} */}
           </nav>
 
           <div className="hidden md:flex items-center gap-4">

@@ -4,10 +4,12 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { useAuth } from "@/components/contexts/AuthContext"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { AlertCircle } from "lucide-react"
+import logo from "@/public/nis.svg"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -38,7 +40,7 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">Welcome Back</h1>
+           <Image src={logo} alt="NIS Logo" width={32} height={32} className="justify-center" />
           <p className="text-center text-gray-600 mb-8">Login to your REDAS account</p>
 
           {error && (

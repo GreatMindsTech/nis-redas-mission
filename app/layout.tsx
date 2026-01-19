@@ -4,6 +4,10 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { AuthProvider } from "@/components/contexts/AuthContext"
+import { NotificationProvider } from "@/components/contexts/NotificationContext"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
+import { Toaster } from "@/components/ui/sonner"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -39,7 +43,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="flex-1 w-full">
+                {children}
+              </main>
+            </SidebarProvider>
+            <Toaster />
+          </NotificationProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>
