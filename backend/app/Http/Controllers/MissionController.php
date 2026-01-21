@@ -5,16 +5,51 @@ namespace App\Http\Controllers;
 use App\Models\Mission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 
 class MissionController extends Controller
 {
     /**
-     * Get all missions
+     * Get all missions with optimized queries and caching
      */
-    public function index()
+    public function index(Request $request)
     {
-        $missions = Mission::with('creator', 'staff')->paginate(15);
-        return response()->json($missions);
+        $perPage = $request->input('per_page', 15);
+        $perPage = min($perPage, 100); // Max 100 items per page
+        
+        // Build query with eager loading to prevent N+1 queries
+        $query = Mission::with(['creator:id,first_name,last_name,email'])
+            ->withCount('staff')
+            ->select([
+                'id', 'name', 'code', 'description', 'city', 'country', 
+                'region', 'address', 'contact_email', 'contact_phone', 
+                'status', 'created_by', 'created_at', 'updated_at'
+            ]);
+        
+        // Apply filters if provided
+        if ($request->has('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        
+        if ($request->has('region')) {
+            $query->where('region', $request->input('region'));
+        }
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
+                  ->orWhere('country', 'like', "%{$search}%");
+            });
+        }
+        
+        $missions = $query->paginate($perPage);
+        
+        // Add cache headers
+        return response()->json($missions)
+            ->header('Cache-Control', 'public, max-age=300'); // 5 minutes
     }
 
     /**
@@ -129,7 +164,7 @@ class MissionController extends Controller
      */
     public function getMissionStaff()
     {
-        $staff = \DB::table('mission_staff')
+        $staff = DB::table('mission_staff')
             ->join('users', 'mission_staff.user_id', '=', 'users.id')
             ->select(
                 'users.id',

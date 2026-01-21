@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { AuthProvider } from "@/components/contexts/AuthContext"
 import { NotificationProvider } from "@/components/contexts/NotificationContext"
+import { QueryProvider } from "@/components/providers/QueryProvider"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
 import { Toaster } from "@/components/ui/sonner"
@@ -43,17 +44,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <AuthProvider>
-          <NotificationProvider>
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                {children}
-              </SidebarInset>
-            </SidebarProvider>
-            <Toaster />
-          </NotificationProvider>
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  {children}
+                </SidebarInset>
+              </SidebarProvider>
+              <Toaster />
+            </NotificationProvider>
+          </AuthProvider>
+        </QueryProvider>
         <Analytics />
       </body>
     </html>
