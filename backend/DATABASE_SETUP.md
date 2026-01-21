@@ -2,28 +2,32 @@
 
 ## Mock Users for Login Authentication
 
-This guide explains how to set up the database with mock users for testing login authentication.
+This guide explains how to set up the PostgreSQL database with mock users for testing login authentication.
 
 ## Prerequisites
 
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - Composer installed
+- PostgreSQL installed and running
+- PostgreSQL PHP extension (pdo_pgsql) enabled
 - Database configured in `.env` file
 
 ## Setup Instructions
 
 ### 1. Configure Database
 
-Make sure your `.env` file has the correct database configuration:
+Make sure your `.env` file has the correct PostgreSQL database configuration:
 
 ```env
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=immigration_service
-DB_USERNAME=your_username
+DB_PORT=5432
+DB_DATABASE=nis_redas_app
+DB_USERNAME=postgres
 DB_PASSWORD=your_password
 ```
+
+**Note:** Update the `DB_PASSWORD` with your actual PostgreSQL password. If you haven't set a password for the postgres user, you can leave it empty or set one in PostgreSQL.
 
 ### 2. Run Migrations
 
@@ -59,11 +63,11 @@ php artisan migrate:fresh --seed
 After seeding, you'll have the following test users available:
 
 | Role | Email | Password | First Name | Last Name |
-|------|-------|----------|------------|-----------|
-| Super Admin | super_admin@example.com | password | Super | Admin |
-| Admin | admin@example.com | password | Admin | User |
-| Supervisor | supervisor@example.com | password | Supervisor | User |
-| User | user@example.com | password | Regular | User |
+| --- | --- | --- | --- | --- |
+| Super Admin | <super_admin@example.com> | password | Super | Admin |
+| Admin | <admin@example.com> | password | Admin | User |
+| Supervisor | <supervisor@example.com> | password | Supervisor | User |
+| User | <user@example.com> | password | Regular | User |
 
 **Note:** All users have the same password: `password`
 
@@ -133,6 +137,7 @@ php artisan migrate:fresh --seed
 ```
 
 This will:
+
 1. Drop all tables
 2. Run all migrations
 3. Seed mock users

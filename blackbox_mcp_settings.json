@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "github.com/awslabs/mcp/tree/main/src/frontend-mcp-server": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "C:\\Users\\MICKYT\\.local\\bin\\uv.exe",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "awslabs.frontend-mcp-server@latest",
+        "awslabs.frontend-mcp-server.exe"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    }
+  }
+}
