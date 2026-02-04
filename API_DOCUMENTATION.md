@@ -90,7 +90,6 @@ Get authenticated user details.
 ```
 Authorization: Bearer {token}
 ```
-
 **Response:** `200 OK`
 ```json
 {

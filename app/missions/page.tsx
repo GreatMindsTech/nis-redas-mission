@@ -1,5 +1,3 @@
-"use client"
-
 import { Suspense } from "react"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import { LazyMissionsPage } from "@/components/lazy"

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class ValidateRequest
 {
@@ -51,7 +52,7 @@ class ValidateRequest
         foreach ($suspiciousPatterns as $pattern) {
             if (preg_match($pattern, $userAgent)) {
                 // Log suspicious activity
-                \Log::warning('Suspicious user agent detected', [
+                Log::warning('Suspicious user agent detected', [
                     'user_agent' => $userAgent,
                     'ip' => $request->ip(),
                     'path' => $request->path(),
@@ -113,3 +114,4 @@ class ValidateRequest
 
         $request->merge($input);
     }
+}

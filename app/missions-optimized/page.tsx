@@ -3,6 +3,12 @@ import { PageLoading } from '@/components/ui/loading'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { LazyMissionsPage } from '@/components/lazy'
 
+// Optional: Add metadata for SEO
+export const metadata = {
+  title: 'Diplomatic Missions | REDAS',
+  description: 'View and manage diplomatic missions',
+}
+
 // This page demonstrates the optimizations:
 // 1. Lazy loading with Suspense
 // 2. Protected route wrapper
@@ -16,12 +22,6 @@ export default function MissionsOptimizedPage() {
       </Suspense>
     </ProtectedRoute>
   )
-}
-
-// Optional: Add metadata for SEO
-export const metadata = {
-  title: 'Diplomatic Missions | REDAS',
-  description: 'View and manage diplomatic missions',
 }
 
 // Optional: Enable ISR (Incremental Static Regeneration)
